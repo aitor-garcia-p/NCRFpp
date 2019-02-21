@@ -8,3 +8,5 @@ sent.*
 
 .idea/
 *.egg-info
+build/
+*.egg

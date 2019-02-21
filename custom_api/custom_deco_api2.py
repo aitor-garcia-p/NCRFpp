@@ -6,6 +6,7 @@ Remarks about this API:
  - the input is expected to be a single piece of raw of text, tokenization is not responsibility of the client
  - it is responsibility of the tool to use the same tokenisation (or the most similar one) than the one used for training
 """
+import es_core_news_sm
 from typing import List, Tuple, Dict
 
 import spacy
@@ -46,16 +47,10 @@ class CustomDecodingAPI:
         for i, token in enumerate(tokens):
             line = token
             for feature in all_features:
-                line += '{}[{}]{}'.format(separator, feature[0], features[1][i])
+                line += '{}[{}]{}'.format(separator, feature[0], feature[1][i])
             featurized_output.append(line.strip() + '\n')
 
-        print(featurized_output)
-        # not really necessary...
-        # some features might need the whole text to be computed (e.g. part-of-speech)
-        # so better that the feature generators admit full texts (sentences or whatever)
-        # and internally assign the feature individually or in group
-
-        pass
+        return featurized_output
 
 
 if __name__ == '__main__':
@@ -64,9 +59,11 @@ if __name__ == '__main__':
     prefix2 = AffixFeatureGenerator(feature_name='prefix2', affix_type='prefix', size=2)
     prefix3 = AffixFeatureGenerator(feature_name='prefix3', affix_type='prefix', size=3)
 
-    nlp = es_core_news_sm.load() # spacy.load('es_core_news_sm')
+    nlp = es_core_news_sm.load()
     spacy_pos = SpacyBasedFeatureGenerator(feature_name='pos', spacy_model=nlp, feature_type='pos')
     spacy_lemma = SpacyBasedFeatureGenerator(feature_name='lemma', spacy_model=nlp, feature_type='lemma')
 
     custom_deco_api = CustomDecodingAPI(feature_generators=[suffix2, suffix3, prefix2, prefix3, spacy_pos, spacy_lemma])
-    custom_deco_api.compute_features(tokens='esto es una prueba con palabras bonitas'.split(' '))
+    generated_features = custom_deco_api.compute_features(tokens='esto es una prueba con palabras bonitas'.split(' '))
+
+    [print(output) for output in generated_features]
