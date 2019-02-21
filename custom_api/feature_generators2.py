@@ -2,12 +2,19 @@
 Better to use classes as feature generators so the code can be reused with different parameters
 
 """
+import abc
 from typing import List, Tuple
 
 from spacy.tokens.doc import Doc
 
 
-class AffixFeatureGenerator:
+class FeatureGenerator(abc.ABC):
+    @abc.abstractmethod
+    def generate_feature(self, tokens: List[str]) -> Tuple[str, List[str]]:
+        pass
+
+
+class AffixFeatureGenerator(FeatureGenerator):
 
     def __init__(self, feature_name: str, affix_type: str, size: int):
         """
@@ -29,9 +36,10 @@ class AffixFeatureGenerator:
         return self.feature_name, feature_values
 
 
-class DictionaryBasedFeatureGenerator:
+class DictionaryBasedFeatureGenerator(FeatureGenerator):
 
-    def __init__(self, feature_name, input_path, unknown_value: str = '-1', values_separator: str = ' ', trim_value_at: int = None):
+    def __init__(self, feature_name, input_path, unknown_value: str = '-1', values_separator: str = ' ',
+                 trim_value_at: int = None):
         self.feature_name = feature_name
         self.feat_dict = self.load(input_path)
         self.unknown_value = unknown_value
@@ -51,11 +59,12 @@ class DictionaryBasedFeatureGenerator:
     def generate_feature(self, tokens: List[str]) -> Tuple[str, List[str]]:
         feature_values = [self.feat_dict.get(tok, self.unknown_value) for tok in tokens]
         if self.trim_value_at is not None:
-            feature_values = [val[:self.trim_value_at] if len(val) > self.trim_value_at else val for val in feature_values]
+            feature_values = [val[:self.trim_value_at] if len(val) > self.trim_value_at else val for val in
+                              feature_values]
         return self.feature_name, feature_values
 
 
-class SpacyBasedFeatureGenerator:
+class SpacyBasedFeatureGenerator(FeatureGenerator):
 
     def __init__(self, feature_name, spacy_model, feature_type: str):
         """
