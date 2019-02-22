@@ -41,9 +41,9 @@ class DictionaryBasedFeatureGenerator(FeatureGenerator):
     def __init__(self, feature_name, input_path, unknown_value: str = '-1', values_separator: str = ' ',
                  trim_value_at: int = None):
         self.feature_name = feature_name
+        self.values_separator = values_separator  # important to instantiate the values_separator before the load()
         self.feat_dict = self.load(input_path)
         self.unknown_value = unknown_value
-        self.values_separator = values_separator
         self.trim_value_at = trim_value_at
 
     def load(self, input_path):
@@ -86,3 +86,46 @@ class SpacyBasedFeatureGenerator(FeatureGenerator):
         else:
             raise Exception('Incorrect feature type: {}'.format(self.feature_type))
         return self.feature_name, feature_values
+
+
+class CapitalizationFeatureGenerator(FeatureGenerator):
+
+    def __init__(self, feature_name, caps_type: str = 'first'):
+        """
+
+        :param feature_name:
+        :param caps_type: 'first', 'all', 'some'
+        """
+        self.feature_name = feature_name
+        self.caps_type = caps_type
+
+    def generate_feature(self, tokens: List[str]) -> Tuple[str, List[str]]:
+        if self.caps_type == 'first':
+            return self.feature_name, ['1' if token[0].isupper() else '0' for token in tokens]
+        elif self.caps_type == 'all':
+            return self.feature_name, [1 if token.isupper() else 0 for token in tokens]
+        elif self.caps_type == 'some':
+            # I have copied this from other source file, but I don't really understand why is it so, or if this is correct or not...
+            return self.feature_name, [1 if token[0].isupper() and len(token) > 2 and token[1].isupper() else 0 for token in tokens]
+        else:
+            raise Exception('Incorrect caps type: {}'.format(self.caps_type))
+
+
+class WordPositionFeatureGenerator(FeatureGenerator):
+
+    def __init__(self, feature_name, position_type: str = 'first'):
+        """
+
+        :param feature_name:
+        :param position_type: 'first' or 'last'
+        """
+        self.feature_name = feature_name
+        self.position_type = position_type
+
+    def generate_feature(self, tokens: List[str]) -> Tuple[str, List[str]]:
+        if self.position_type == 'first':
+            return self.feature_name, ['1'] + ['0' for _ in tokens[1:]]
+        elif self.position_type == 'last':
+            return self.feature_name, ['0' for _ in tokens[:-1]] + ['1']
+        else:
+            raise Exception('Incorrect position type: {}'.format(self.position_type))
