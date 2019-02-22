@@ -41,6 +41,7 @@ class CustomDecodingAPI:
         """
         Receives a list of tokens, and computes the features for each of them (where are those features specified?)
         The result is a list of tuples, containing each token and a dictionary of features
+        :param fake_label:
         :param separator:
         :param tokens:
         :return:
