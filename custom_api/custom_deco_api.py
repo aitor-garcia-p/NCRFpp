@@ -16,7 +16,7 @@ from typing import List, Tuple, Dict
 import torch
 
 # import spacy
-
+from custom_api.helpers import compute_features
 from custom_api.feature_generators import FeatureGenerator, AffixFeatureGenerator, SpacyBasedFeatureGenerator, \
     DictionaryBasedFeatureGenerator, \
     CapitalizationFeatureGenerator, WordPositionFeatureGenerator
@@ -31,12 +31,12 @@ from main import recover_nbest_label, get_ner_fmeasure, recover_label, batchify_
 FEATURES = []
 
 
-class CustomDecodingAPI:
+def default_tokenizer(input_text: str) -> List[str]:
+    # naive, just to test
+    return input_text.split(' ')
 
-    @staticmethod
-    def default_tokenizer(input_text: str) -> List[str]:
-        # naive, just to test
-        return input_text.split(' ')
+
+class CustomDecodingAPI:
 
     def __init__(self, feature_generators: List[FeatureGenerator], tokenizer=default_tokenizer):
         self.feature_generators = feature_generators  # I am not sure what this should look like...
@@ -47,36 +47,36 @@ class CustomDecodingAPI:
         model_name = 'lstmcrf'
 
         tokens = self.tokenizer(input_text)  # self.tokenize_input(input_text)
-        input_lines = self.compute_features(tokens, separator=' ', fake_label='O')
+        input_lines = compute_features(tokens, self.feature_generators, separator=' ')
 
         decode_results, pred_scores = self.label_input(input_lines, model_dir, model_name, nbest=5)
         return decode_results, pred_scores
 
-    def compute_features(self, tokens: List[str], separator: str = '\t', fake_label: str = None) \
-            -> List[Tuple[str, Dict[str, str]]]:
-        """
-        Receives a list of tokens, and computes the features for each of them (where are those features specified?)
-        The result is a list of tuples, containing each token and a dictionary of features
-        :param fake_label:
-        :param separator:
-        :param tokens:
-        :return:
-        """
-        all_features = []
-        for feature_generator in self.feature_generators:
-            features = feature_generator.generate_feature(tokens)
-            all_features.append(features)
-
-        featurized_output = []
-        for i, token in enumerate(tokens):
-            line = token
-            for feature in all_features:
-                line += '{}[{}]{}'.format(separator, feature[0], feature[1][i])
-            if fake_label:
-                line += separator + fake_label
-            featurized_output.append(line.strip() + '\n')
-
-        return featurized_output
+    # def compute_features(self, tokens: List[str], separator: str = '\t', fake_label: str = None) \
+    #         -> List[Tuple[str, Dict[str, str]]]:
+    #     """
+    #     Receives a list of tokens, and computes the features for each of them (where are those features specified?)
+    #     The result is a list of tuples, containing each token and a dictionary of features
+    #     :param fake_label:
+    #     :param separator:
+    #     :param tokens:
+    #     :return:
+    #     """
+    #     all_features = []
+    #     for feature_generator in self.feature_generators:
+    #         features = feature_generator.generate_feature(tokens)
+    #         all_features.append(features)
+    #
+    #     featurized_output = []
+    #     for i, token in enumerate(tokens):
+    #         line = token
+    #         for feature in all_features:
+    #             line += '{}[{}]{}'.format(separator, feature[0], feature[1][i])
+    #         if fake_label:
+    #             line += separator + fake_label
+    #         featurized_output.append(line.strip() + '\n')
+    #
+    #     return featurized_output
 
     def label_input(self, input_lines, model_dir, model_name, nbest=None):
         data = Data()
@@ -382,17 +382,18 @@ if __name__ == '__main__':
     spacy_pos = SpacyBasedFeatureGenerator(feature_name='POS', spacy_model=nlp, feature_type='pos')
     spacy_lemma = SpacyBasedFeatureGenerator(feature_name='LEM', spacy_model=nlp, feature_type='lemma')
 
+    feature_generators = [spacy_pos, cap, is_first, allcaps, somecaps, spacy_lemma, prefix3, prefix4, suffix1,
+                          suffix2, suffix3, suffix4, brown4,
+                          brown6, brown10, brown20, c1, c3, c4, c5]
     custom_deco_api = CustomDecodingAPI(
-        feature_generators=[spacy_pos, cap, is_first, allcaps, somecaps, spacy_lemma, prefix3, prefix4, suffix1,
-                            suffix2, suffix3, suffix4, brown4,
-                            brown6, brown10, brown20, c1, c3, c4, c5])
-    generated_features = custom_deco_api.compute_features(tokens='esto es una prueba con palabras bonitas'.split(' '),
-                                                          separator=' ')
+        feature_generators=feature_generators)
+    generated_features = compute_features(tokens='esto es una prueba con palabras bonitas'.split(' '), feature_generators=feature_generators,
+                                          separator=' ')
 
     [print(output) for output in generated_features]
 
-    generated_features = custom_deco_api.compute_features(tokens='gaur Donostian denbora ona egiten du'.split(' '),
-                                                          separator=' ')
+    generated_features = compute_features(tokens='gaur Donostian denbora ona egiten du'.split(' '), feature_generators=feature_generators,
+                                          separator=' ')
     [print(output) for output in generated_features]
 
     deco, probs = custom_deco_api.deco_input('gaur Bilbon denbora ona egiten du eta Pepe Goterak hitz egingo du')

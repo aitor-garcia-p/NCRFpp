@@ -38,7 +38,7 @@ class Data:
 
         self.label_alphabet = Alphabet('label',True)
         self.tagScheme = "NoSeg" ## BMES/BIO
-        self.split_token = ' ||| '
+        self.split_token = ' '
         self.seg = True
 
         ### I/O

@@ -1,3 +1,4 @@
+scikit-learn
 spacy==2.0.16
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.0.0/en_core_web_sm-2.0.0.tar.gz#en_core_web_sm
 https://github.com/explosion/spacy-models/releases/download/es_core_news_sm-2.0.0/es_core_news_sm-2.0.0.tar.gz#es_core_news_sm
