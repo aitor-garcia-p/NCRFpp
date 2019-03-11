@@ -98,8 +98,11 @@ class CustomDecodingAPI:
         data.fix_alphabet()
         data.nbest = nbest
 
-        print("LABEL ALPHABET SIZE", len(data.label_alphabet.instance2index))
-        print("LABEL ALPHABET", data.label_alphabet.instance2index)
+        # print("LABEL ALPHABET SIZE", len(data.label_alphabet.instance2index))
+        # print("LABEL ALPHABET", data.label_alphabet.instance2index)
+        # print('Char alphabet')
+        # for i in range(180):
+        #     print(i, data.char_alphabet.get_instance(i))
 
         data.raw_texts, data.raw_Ids = self.read_instance(input_lines, data.word_alphabet, data.char_alphabet,
                                                           data.feature_alphabets, data.label_alphabet,
@@ -108,10 +111,10 @@ class CustomDecodingAPI:
 
         decode_results, pred_scores = self.load_model_decode(data, 'raw')
 
-        print("LABEL ALPHABET SIZE", len(data.label_alphabet.instance2index))
-        print("LABEL ALPHABET", data.label_alphabet.instance2index)
-        for i in range(12):
-            print(i, data.label_alphabet.get_instance(i))
+        # print("LABEL ALPHABET SIZE", len(data.label_alphabet.instance2index))
+        # print("LABEL ALPHABET", data.label_alphabet.instance2index)
+        # for i in range(12):
+        #     print(i, data.label_alphabet.get_instance(i))
 
         return decode_results, pred_scores
 
