@@ -26,7 +26,7 @@ from model.sentclassifier import SentClassifier
 from model.seqlabel import SeqLabel
 from utils.data import Data
 from utils.functions import normalize_word
-from main import recover_nbest_label, get_ner_fmeasure, recover_label, batchify_with_label
+from custom_api.copied_main import recover_nbest_label, get_ner_fmeasure, recover_label, batchify_with_label
 
 FEATURES = []
 
@@ -38,18 +38,20 @@ def default_tokenizer(input_text: str) -> List[str]:
 
 class CustomDecodingAPI:
 
-    def __init__(self, feature_generators: List[FeatureGenerator], tokenizer=default_tokenizer):
+    def __init__(self, model_dir, model_name, feature_generators: List[FeatureGenerator], tokenizer=default_tokenizer):
+        self.model_dir = model_dir
+        self.model_name = model_name
         self.feature_generators = feature_generators  # I am not sure what this should look like...
         self.tokenizer = tokenizer
 
     def deco_input(self, input_text: str):
-        model_dir = 'C:\\Users\\agarciap\\Data\\DATASETS\\NCRFpp_tests\\test_with_crf'
-        model_name = 'lstmcrf'
+        # model_dir = 'C:\\Users\\agarciap\\Data\\DATASETS\\NCRFpp_tests\\test_with_crf'
+        # model_name = 'lstmcrf'
 
         tokens = self.tokenizer(input_text)  # self.tokenize_input(input_text)
         input_lines = compute_features(tokens, self.feature_generators, separator=' ')
 
-        decode_results, pred_scores = self.label_input(input_lines, model_dir, model_name, nbest=5)
+        decode_results, pred_scores = self.label_input(input_lines, self.model_dir, self.model_name, nbest=5)
         return decode_results, pred_scores
 
     # def compute_features(self, tokens: List[str], separator: str = '\t', fake_label: str = None) \
@@ -385,8 +387,12 @@ if __name__ == '__main__':
     feature_generators = [spacy_pos, cap, is_first, allcaps, somecaps, spacy_lemma, prefix3, prefix4, suffix1,
                           suffix2, suffix3, suffix4, brown4,
                           brown6, brown10, brown20, c1, c3, c4, c5]
-    custom_deco_api = CustomDecodingAPI(
-        feature_generators=feature_generators)
+
+    model_dir = 'C:\\Users\\agarciap\\Data\\DATASETS\\NCRFpp_tests\\test_with_crf'
+    model_name = 'lstmcrf'
+
+    custom_deco_api = CustomDecodingAPI(model_dir=model_dir, model_name=model_name,
+                                        feature_generators=feature_generators)
     generated_features = compute_features(tokens='esto es una prueba con palabras bonitas'.split(' '), feature_generators=feature_generators,
                                           separator=' ')
 

@@ -2,7 +2,8 @@ import os
 import tempfile
 from typing import List
 
-import main
+# I have copied the whole 'main' into a package to ease the packetization
+import custom_api.copied_main as main
 from custom_api.feature_generators import FeatureGenerator
 from sklearn.model_selection import train_test_split
 
