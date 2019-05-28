@@ -50,6 +50,8 @@ def generate_ncrfpp_dataset(input_folder, output):
         for sent in doc.sents:
             for token in doc[sent.start:sent.end]:
                 if len(token.text.strip()) == 0:
+                    # this is for the line breaks, spaCy seems to treat them as tokens, so we leverage them here to add a sentence separation
+                    output_lines.append('')
                     continue
                 offset = token.idx
                 # print('Token offset {}, (now plus sent) {}'.format(offset, sent.start + offset))
