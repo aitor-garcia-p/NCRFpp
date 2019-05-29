@@ -2,10 +2,12 @@ from typing import List, Tuple, Dict
 
 from custom_api.feature_generators import FeatureGenerator
 
-FAKE_LABEL='O'
+FAKE_LABEL = 'O'
 
-def compute_features(tokens: List[str], feature_generators: List[FeatureGenerator], separator: str = '\t', labels: List[str] = None) \
-        -> List[Tuple[str, Dict[str, str]]]:
+
+def compute_features(tokens: List[str], feature_generators: List[FeatureGenerator], separator: str = '\t', labels: List[str] = None,
+                     lowercase_tokens=True) \
+        -> List[str]:
     """
     Receives a list of tokens, and computes the features for each of them (where are those features specified?)
     The result is a list of tuples, containing each token and a dictionary of features.
@@ -21,9 +23,12 @@ def compute_features(tokens: List[str], feature_generators: List[FeatureGenerato
         features = feature_generator.generate_feature(tokens)
         all_features.append(features)
 
+    # At this point the features have been generated, we can proceed to normalize the tokens if necessary
+    # e.g. lowercase them (or remove some diacritic marks, etc.)
+
     featurized_output = []
     for i, token in enumerate(tokens):
-        line = token
+        line = token.lower() if lowercase_tokens else token
         for feature in all_features:
             line += '{}[{}]{}'.format(separator, feature[0], feature[1][i])
         if labels:

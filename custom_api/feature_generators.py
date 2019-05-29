@@ -103,10 +103,10 @@ class CapitalizationFeatureGenerator(FeatureGenerator):
         if self.caps_type == 'first':
             return self.feature_name, ['1' if token[0].isupper() else '0' for token in tokens]
         elif self.caps_type == 'all':
-            return self.feature_name, [1 if token.isupper() else 0 for token in tokens]
+            return self.feature_name, ['1' if token.isupper() else '0' for token in tokens]
         elif self.caps_type == 'some':
             # I have copied this from other source file, but I don't really understand why is it so, or if this is correct or not...
-            return self.feature_name, [1 if token[0].isupper() and len(token) > 2 and token[1].isupper() else 0 for token in tokens]
+            return self.feature_name, ['1' if token[0].isupper() and len(token) > 2 and token[1].isupper() else '0' for token in tokens]
         else:
             raise Exception('Incorrect caps type: {}'.format(self.caps_type))
 

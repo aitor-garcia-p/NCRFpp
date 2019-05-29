@@ -26,7 +26,7 @@ class CustomTrainApi:
         self.config_file_path = config_file_path
         self.feature_generators = feature_generators
 
-    def prepare_data_and_train(self, train_set: str, output_model_dir: str, output_model_name: str, seed: int = 1234):
+    def prepare_data_and_train(self, train_set: List[str], output_model_dir: str, output_model_name: str, seed: int = 1234):
         """
         The hyper-parameters are supposed to be fixed in the config file.
         We will read them from there and make use of the very logic to let the toolkit make its work.
@@ -80,10 +80,11 @@ class CustomTrainApi:
             print('Exception: {}'.format(str(e)))
             raise e
 
-        finally:
-            os.remove(train_path)
-            os.remove(dev_path)
-            os.remove(test_path)
+        # Temp folder automatically removed?
+        # finally:
+        #     os.remove(train_path)
+        #     os.remove(dev_path)
+        #     os.remove(test_path)
 
     def featurize(self, dataset):
         featurized_sentences = []
@@ -146,7 +147,7 @@ def split_train_in_sentences(lines: List[str]) -> List[List[str]]:
         if line.strip() == '' and len(current_sentence) > 0:
             sentences.append(current_sentence)
             current_sentence = []
-        else:
+        elif len(line.strip()) > 0:
             current_sentence.append(line)
     # last sentence in case the file ends with no empty line
     if len(current_sentence) > 0:
@@ -156,7 +157,8 @@ def split_train_in_sentences(lines: List[str]) -> List[List[str]]:
 
 if __name__ == '__main__':
     custom_train_api = CustomTrainApi([], '../my_demo.train.config')
-    dataset_path = 'C:\\Users\\agarciap\\Dropbox\\datasets\\egunkaria\\named_ent_eu.test'
+    # dataset_path = 'C:\\Users\\agarciap\\Dropbox\\datasets\\egunkaria\\named_ent_eu.test'
+    dataset_path = 'C:\\Users\\agarciap\\Data\\DATASETS\\NCRFpp_tests\\TEST_named_ent_eu.test.ixaAlike'
     with open(dataset_path, 'r', encoding='utf-8') as f:
         content_lines = f.readlines()
     print(content_lines[:50])
